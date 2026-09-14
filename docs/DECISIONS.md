@@ -37,7 +37,7 @@ must be maintained.
 **Decision:** Build the project in Claude's sandboxed environment as a
 local git repo, and deliver work as downloadable files/zips until a real
 GitHub repo exists. Recommend the owner create one as soon as practical
-so `AGENTS.md`'s "the repository remembers" principle actually holds
+so `../AGENTS.md`'s "the repository remembers" principle actually holds
 across sessions.
 
 **Alternatives considered:** Waiting to do any work until a repo exists

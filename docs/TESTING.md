@@ -37,7 +37,7 @@ Testing Library) — finalize the exact choice in Phase 1 and record it here.
 
 Prioritize meaningful coverage over arbitrary percentage targets. Every
 meaningful feature should consider: loading state, success state, error
-state, empty state (see `RULES.md`, `AGENTS.md`).
+state, empty state (see `RULES.md`, `../AGENTS.md`).
 
 ## Commands
 

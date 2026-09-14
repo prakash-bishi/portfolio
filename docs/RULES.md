@@ -34,7 +34,7 @@ through their own task, not piggybacked on an unrelated change.
 ## 4. No Silent Architecture Changes
 
 Significant architecture changes require the analysis described in
-`AGENTS.md` ("Architecture Change Rule") and a record in `DECISIONS.md`.
+`../AGENTS.md` ("Architecture Change Rule") and a record in `DECISIONS.md`.
 
 ## 5. No Premature Features
 

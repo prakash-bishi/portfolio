@@ -21,6 +21,10 @@ baseline just created; Phase 0 is otherwise complete pending user review.
 - Recorded initial architecture decision (stack choice) and the
   no-GitHub-yet workflow decision in `DECISIONS.md`.
 - Added `.env.example` placeholder and `.gitignore`.
+- GitHub repo created: https://github.com/prakash-bishi/portfolio.
+- Reorganized docs: all Markdown files except `AGENTS.md` and `CLAUDE.md`
+  moved into `docs/`. Cross-references updated throughout (root files use
+  `docs/FILENAME.md`; docs referencing root files use `../AGENTS.md`).
 
 ## What Is Currently Being Worked On
 

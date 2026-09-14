@@ -12,7 +12,7 @@
 
 Document required variables in `.env.example` as they're introduced.
 Escalate to a dedicated `ENVIRONMENT.md` if this grows complex (per the
-"additional documentation" rule in `AGENTS.md`).
+"additional documentation" rule in `../AGENTS.md`).
 
 ## Authentication / Authorization
 
