@@ -4,47 +4,78 @@ _Last updated: 2026-09-14_
 
 ## What Is Currently Implemented
 
-Nothing yet. This is a fresh restart. No frontend, backend, database, or
-Docker setup exists. Only the documentation foundation has been created.
+**Backend** (`backend/`): Django + DRF project scaffolded (`config`
+project, `health` app). `GET /api/health/` checks DB connectivity and
+returns 200 (`{"status": "ok", "database": "ok"}`) or 503. Settings are
+fully environment-driven — no hardcoded secrets. Postgres by default,
+sqlite fallback via `DATABASE_ENGINE=sqlite`. One passing test
+(`backend/health/tests.py`).
+
+**Frontend** (`frontend/`): Next.js (App Router) + TypeScript + Tailwind
+scaffolded. Default template replaced with a minimal placeholder
+homepage. `/status` page + `src/lib/api.ts` call the backend health
+check end-to-end (real frontend↔backend wiring, not just scaffolding).
+Vitest + React Testing Library set up, one passing test. Lint clean.
+
+**Infrastructure**: `docker-compose.yml` at repo root wires `db`
+(Postgres 17), `backend`, `frontend` with health checks and volumes.
+`.env.example` at root (for Docker Compose) and inside `backend/` and
+`frontend/` (for running each service without Docker).
+
+**No content models exist yet** — Profile, Experience, Projects,
+Research, Startup, etc. are all Phase 3+ (see `ROADMAP.md`).
 
 ## What Phase Are We In
 
-**Phase 0 — Documentation & Foundation** (see `ROADMAP.md`). Documentation
-baseline just created; Phase 0 is otherwise complete pending user review.
+**Phase 1 — Technical Foundation** — scaffolding complete, see
+"Verification Gaps" below before calling it fully confirmed.
 
 ## What Was Recently Completed
 
 - Repository inspected: confirmed empty, fresh start, nothing to preserve.
-- Baseline documentation created: `PRD.md`, `AGENTS.md`, `CLAUDE.md`,
-  `DESIGN.md`, `ARCHITECTURE.md`, `RULES.md`, `MEMORY.md` (this file),
-  `DECISIONS.md`, `TESTING.md`, `SECURITY.md`, `ROADMAP.md`.
-- Recorded initial architecture decision (stack choice) and the
-  no-GitHub-yet workflow decision in `DECISIONS.md`.
-- Added `.env.example` placeholder and `.gitignore`.
-- GitHub repo created: https://github.com/prakash-bishi/portfolio.
-- Reorganized docs: all Markdown files except `AGENTS.md` and `CLAUDE.md`
-  moved into `docs/`. Cross-references updated throughout (root files use
-  `docs/FILENAME.md`; docs referencing root files use `../AGENTS.md`).
+- Baseline documentation created (Phase 0), then reorganized into `docs/`
+  with `AGENTS.md`/`CLAUDE.md` kept at repo root.
+- GitHub repo created: https://github.com/prakash-bishi/portfolio
+  (current pushed commit: `6c9a76b`, "Reorganize docs into docs/ folder").
+- Phase 1 scaffolding built in Claude's sandbox (backend, frontend,
+  docker-compose.yml, env files, README.md) — **not yet committed or
+  pushed** as of this update. See "What Remains".
+- Recorded Phase 1 decisions in `DECISIONS.md`: env-driven Django
+  settings with Postgres-by-default, Vitest for frontend tests, and the
+  unverified-production-build sandbox limitation.
+- Updated `docs/ARCHITECTURE.md` and `docs/TESTING.md` to reflect what's
+  actually built (no longer placeholders).
 
 ## What Is Currently Being Worked On
 
-Nothing — awaiting the next implementation instruction from the project
-owner.
+Finishing Phase 1: committing the scaffolded backend/frontend/Docker
+setup and delivering it to the project owner to pull into their local
+clone and push to GitHub (same pattern as the Phase 0 docs reorg).
 
 ## What Remains
 
-- Owner needs to set up a GitHub repository (currently none exists) so
-  future Claude sessions can work against a persistent remote instead of
-  a fresh sandbox export each time.
-- Phase 1 (Technical Foundation) has not started: no frontend/backend
-  scaffolding, no database, no Docker Compose file yet.
-- `DESIGN.md` is a placeholder — real design system work is Phase 2.
-- `TESTING.md` commands section is a placeholder until Phase 1 scaffolds
-  real projects.
+- **Not yet committed to git** — everything described above exists only
+  in Claude's sandbox as of this update. Needs a commit + delivery to the
+  owner + push to GitHub before it's real project state.
+- **`docker compose up` has not been tested** — Docker isn't available in
+  Claude's sandbox. The owner must verify the full stack actually starts
+  and the three services talk to each other correctly.
+- **`npm run build` (frontend production build) has not been verified** —
+  fails in Claude's sandbox due to a domain restriction on
+  `fonts.googleapis.com` (used by `next/font/google` for the Geist
+  typeface). Should work normally with real internet access, but needs
+  confirming on a real machine. See `docs/TESTING.md` "Known Constraint".
+- Database migrations have not been run against a real Postgres instance
+  (only tested against sqlite in-memory in Claude's sandbox).
+- `docs/DESIGN.md` is still a Phase 2 placeholder.
+- Phase 2 (Design System & Site Shell) has not started.
 
 ## Important Temporary Constraints
 
-- No persistent remote repository yet — every session should confirm
-  whether one now exists before assuming continuity.
-- No real content has been drafted for any page yet beyond the reference
-  facts already captured in `PRD.md`.
+- Treat this phase as "scaffolded and unit-tested in isolation" rather
+  than "fully verified end-to-end" until the owner confirms
+  `docker compose up` and `npm run build` both work on a real machine.
+- `frontend/AGENTS.md` and `frontend/CLAUDE.md` are Next.js
+  framework-generated files (regenerated by `next dev`), unrelated to
+  this repo's own root-level `AGENTS.md`/`CLAUDE.md`. Don't confuse the
+  two — see the note in `docs/ARCHITECTURE.md`.

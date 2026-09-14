@@ -1,9 +1,10 @@
 # TESTING.md — Testing Strategy
 
-## Status (Phase 0)
+## Status (Phase 1)
 
-No code exists yet, so no test suite exists yet. This document defines the
-standard to apply once implementation begins (Phase 1+).
+Frontend and backend are scaffolded with working test setups and one
+passing test each (a foundation smoke test, not real coverage yet).
+Real coverage grows as real features are built in later phases.
 
 ## Backend (Django + DRF)
 
@@ -13,7 +14,10 @@ standard to apply once implementation begins (Phase 1+).
 - Business logic tests — anything beyond simple CRUD (e.g. contact-form
   spam checks).
 
-Expected tooling: Django's test runner / `pytest-django`.
+Tooling: Django's built-in test runner + DRF's `APITestCase`.
+
+Current tests: `backend/health/tests.py` — verifies `/api/health/` returns
+200 and reports the database as reachable.
 
 ## Frontend (Next.js + TypeScript)
 
@@ -21,8 +25,10 @@ Expected tooling: Django's test runner / `pytest-django`.
 - Page tests — key pages render and fetch data correctly.
 - Interaction tests — forms, navigation, filtering (if/when built).
 
-Expected tooling: a standard React testing setup (e.g. Vitest/Jest +
-Testing Library) — finalize the exact choice in Phase 1 and record it here.
+Tooling: Vitest + React Testing Library + jsdom.
+
+Current tests: `frontend/src/app/__tests__/page.test.tsx` — verifies the
+placeholder homepage renders.
 
 ## System-Level
 
@@ -41,5 +47,30 @@ state, empty state (see `RULES.md`, `../AGENTS.md`).
 
 ## Commands
 
-To be filled in once the frontend/backend projects are scaffolded (Phase
-1). This section must be updated at that point — do not leave it stale.
+**Backend** (from `backend/`):
+```bash
+python manage.py test              # run all tests
+python manage.py test health       # run one app's tests
+python manage.py check             # system check
+```
+
+**Frontend** (from `frontend/`):
+```bash
+npm run test          # run tests once
+npm run test:watch    # watch mode
+npm run lint          # eslint
+npx tsc --noEmit      # type check
+npm run build         # production build (requires internet access for
+                       # next/font/google — see docs/DECISIONS.md)
+```
+
+## Known Constraint
+
+Frontend production builds (`npm run build`) require network access to
+`fonts.googleapis.com` because `layout.tsx` uses `next/font/google` for
+the Geist typeface. This was not verifiable inside Claude's sandboxed
+build environment (restricted domain allowlist) but is a normal
+requirement for any real dev machine or CI runner with internet access.
+If this ever becomes a real constraint (e.g. an offline build
+environment), switch to `next/font/local` with self-hosted font files.
+
