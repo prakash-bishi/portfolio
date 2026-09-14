@@ -182,3 +182,34 @@ documentation of what variables exist, and should always be committed.
 any future `*.env.example`-style file added there needs the same
 un-ignore treatment, or a quick `git status`/`git add -n` check to catch
 silently-skipped files.
+
+---
+
+### 2026-09-14 — Fixed: Django rejected server-side requests with 'Invalid HTTP_HOST header'
+
+**Context:** After fixing the `INTERNAL_API_BASE_URL` networking issue
+above, the owner still saw `/status` fail. Direct testing inside the
+frontend container (`fetch('http://backend:8000/api/health/')`) showed
+the real error: Django's `DisallowedHost` exception —
+`ALLOWED_HOSTS = ['localhost', '127.0.0.1']` didn't include `backend`,
+the Host header sent when reaching Django via its Docker Compose service
+name. The two bugs were independent and both needed fixing: without the
+`INTERNAL_API_BASE_URL` fix, the frontend never reaches the backend at
+all (wrong address); without this fix, it reaches the backend but gets
+rejected (right address, disallowed Host header).
+
+**Decision:** Added `backend` to the default `DJANGO_ALLOWED_HOSTS` in
+`docker-compose.yml` and `.env.example`:
+`localhost,127.0.0.1,backend`.
+
+**Reason:** `ALLOWED_HOSTS` must include every hostname Django will
+legitimately receive requests addressed to — the Compose service name is
+one of them for any server-side, container-to-container call.
+
+**Consequences:** Anyone who already ran `cp .env.example .env` before
+this fix has a `.env` file with the old value baked in — updating
+`.env.example` alone does NOT fix their running setup, since Docker
+Compose prefers a value already present in `.env` over the file's
+default. They must manually add `,backend` to `DJANGO_ALLOWED_HOSTS` in
+their own `.env` file (or delete/recreate it from the updated
+`.env.example`) and recreate the backend container.
