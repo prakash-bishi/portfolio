@@ -122,3 +122,63 @@ exists yet. Revisit if that constraint ever becomes real.
 **Consequences:** The project owner must verify `npm run build` succeeds
 on a machine with normal internet access before treating Phase 1 as fully
 confirmed. See `docs/TESTING.md` "Known Constraint".
+
+---
+
+### 2026-09-14 — Separate server-side vs. browser-side API base URL for Docker networking
+
+**Context:** During owner verification of `docker compose up`, the
+`/status` page (a Server Component fetching the backend) failed with
+"Could not reach the backend API", while the same backend endpoint
+worked fine when opened directly in the browser. Root cause: inside
+Docker Compose, `localhost` from within the frontend container refers to
+the frontend container itself, not the backend container — server-side
+fetches need the backend's Compose service name (`http://backend:8000`),
+while browser-side fetches correctly use the host-mapped
+`http://localhost:8000`.
+
+**Decision:** Introduced a second env var, `INTERNAL_API_BASE_URL`, used
+only for server-side fetches (`getApiBaseUrl()` in `src/lib/api.ts`
+checks `typeof window === "undefined"` to decide which URL to use).
+`docker-compose.yml` sets `INTERNAL_API_BASE_URL=http://backend:8000` on
+the frontend service; it's unset (and unnecessary) outside Docker, where
+the two URLs are the same.
+
+**Alternatives considered:** Using a single URL and relying on
+Docker's `extra_hosts`/network aliases to make `localhost` resolve to the
+backend container (rejected — fragile, non-standard, and confusing for
+future contributors); proxying all API calls through a Next.js API route
+(rejected — adds a layer with no real benefit at this project's size).
+
+**Reason:** This split is the standard pattern for containerized Next.js
+apps that both server-render and client-fetch against the same API —
+avoids surprising networking failures without adding real complexity.
+
+**Consequences:** Any future server-side fetch to the backend (e.g. in
+new Server Components or Route Handlers) must go through
+`getApiBaseUrl()` / a helper like it, not a hardcoded `NEXT_PUBLIC_*`
+variable, or this bug will resurface. Added regression tests in
+`src/lib/__tests__/api.test.ts` covering all three cases (server+Docker,
+server+non-Docker, browser) to catch this going forward.
+
+---
+
+### 2026-09-14 — Fixed: frontend/.env.example was silently never committed
+
+**Context:** While tracing the fix above, found that `create-next-app`'s
+auto-generated `frontend/.gitignore` has a blanket `.env*` pattern, which
+also matched (and swallowed) `frontend/.env.example` — meaning it never
+actually made it into the `bfa37b4` Phase 1 commit despite being created.
+
+**Decision:** Added `!.env.example` to `frontend/.gitignore` to
+explicitly un-ignore it, matching the intent (ignore real `.env`/
+`.env.local` files, but always track the example template).
+
+**Reason:** `.env.example` contains no secrets by definition — it's
+documentation of what variables exist, and should always be committed.
+
+**Consequences:** None beyond the fix itself. Worth remembering:
+`create-next-app`'s default `.gitignore` is aggressive about `.env*` and
+any future `*.env.example`-style file added there needs the same
+un-ignore treatment, or a quick `git status`/`git add -n` check to catch
+silently-skipped files.
