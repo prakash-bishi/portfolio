@@ -27,8 +27,18 @@ Current tests: `backend/health/tests.py` — verifies `/api/health/` returns
 
 Tooling: Vitest + React Testing Library + jsdom.
 
-Current tests: `frontend/src/app/__tests__/page.test.tsx` — verifies the
-placeholder homepage renders.
+Current tests (11 across 5 files):
+- `src/app/__tests__/page.test.tsx` — homepage heading renders
+- `src/components/__tests__/Navbar.test.tsx` — wordmark and nav links
+  render; mobile menu is closed by default and opens on toggle
+- `src/components/__tests__/Footer.test.tsx` — current year and nav
+  links render
+- `src/components/__tests__/Button.test.tsx` — renders a real `<button>`
+  without `href`, a `Link` with `href`, and doesn't leak `href` onto the
+  button element
+- `src/lib/__tests__/api.test.ts` — API base URL selection across all
+  three cases (server+Docker, server+non-Docker, browser). This is a
+  regression test for a real bug — see `DECISIONS.md`.
 
 ## System-Level
 
@@ -59,10 +69,18 @@ python manage.py check             # system check
 npm run test          # run tests once
 npm run test:watch    # watch mode
 npm run lint          # eslint
+npx next typegen      # REQUIRED once before tsc (see note below)
 npx tsc --noEmit      # type check
 npm run build         # production build (requires internet access for
-                       # next/font/google — see docs/DECISIONS.md)
+                      # next/font/google — see docs/DECISIONS.md)
 ```
+
+**Note on `tsc --noEmit`:** Next.js generates route/layout types (e.g.
+the `LayoutProps` type used in `src/app/layout.tsx`) into `.next/types/`,
+which is gitignored. On a fresh clone — or after deleting `.next` — a
+bare `tsc --noEmit` fails with "Cannot find name 'LayoutProps'". Run
+`npx next typegen` first (it's fast and, unlike a full build, does not
+need network access for fonts), or run `next dev`/`next build` once.
 
 ## Known Constraint
 

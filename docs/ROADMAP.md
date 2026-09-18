@@ -5,31 +5,32 @@ Premature Features). Each phase begins only when explicitly requested.
 
 ## Current Phase
 
-**Phase 0 — Documentation & Foundation** — IN PROGRESS (this session
-establishes it).
+**Phase 3 — Personal Profile** — not yet started. Phase 2 is complete,
+verified visually by the owner on their own machine.
 
-## Phase 0 — Documentation & Foundation
+## Phase 0 — Documentation & Foundation — COMPLETE
 - Repository inspection
 - Documentation system (this set of files)
 - Architecture validation
-- Development environment (not yet started)
 
-## Phase 1 — Technical Foundation
+## Phase 1 — Technical Foundation — COMPLETE (verified on a real machine)
 - Frontend foundation (Next.js + TypeScript scaffold)
 - Backend foundation (Django + DRF scaffold)
 - Database setup (PostgreSQL)
-- API foundation
+- API foundation (`/api/health/`)
 - Docker/Docker Compose development environment
 - Health checks
 - Basic testing setup
 
-## Phase 2 — Design System & Site Shell
-- Typography, color system, layout/spacing
+## Phase 2 — Design System & Site Shell — COMPLETE (verified on real machine)
+- Typography, color system, layout/spacing tokens
 - Navbar, footer, responsive shell
-- Reusable UI primitives
+- Reusable UI primitives (Container, Button, ComingSoon)
+- Stub routes for every nav destination
 
 ## Phase 3 — Personal Profile
-- About, Experience, Education, Skills pages
+- About page containing Experience, Education, and Skills as sections
+  (not separate routes — see the nav IA decision in `DECISIONS.md`)
 
 ## Phase 4 — Projects
 - Project CMS models, API

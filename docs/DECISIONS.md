@@ -213,3 +213,160 @@ Compose prefers a value already present in `.env` over the file's
 default. They must manually add `,backend` to `DJANGO_ALLOWED_HOSTS` in
 their own `.env` file (or delete/recreate it from the updated
 `.env.example`) and recreate the backend container.
+
+---
+
+### 2026-09-14 — Nav shows 6 top-level items; Experience/Education/Skills fold into /about
+
+**Context:** PRD's Core Pages list (`PRD.md`) names About, Experience,
+Education, Skills, Projects, Project Details, Research, Startup, Contact
+as separate pages. Building the Navbar (Phase 2) required deciding
+whether each becomes its own top-level nav link or whether some are
+grouped.
+
+**Decision:** 6 top-level nav items: Home (wordmark), About, Projects,
+Research, Startup, Contact. Experience, Education, and Skills become
+sections within the `/about` page (built in Phase 3) rather than
+separate top-level routes/nav links.
+
+**Alternatives considered:** One nav link per PRD "Core Page" (9+ items)
+— rejected as cluttered for a personal portfolio nav and against the
+"Clean" design pillar; a nav dropdown/mega-menu — rejected as
+unnecessary complexity for this content volume.
+
+**Reason:** Recruiters/academics scanning a portfolio nav expect a small,
+standard set of top-level sections; Experience/Education/Skills read
+naturally as sections of "who this person is" (About) rather than
+independent destinations.
+
+**Consequences:** Phase 3 (Personal Profile) must build About as a
+single page with distinct Experience/Education/Skills sections
+(consistent anchor-linkable structure), not as separate routes. If a
+real future need for standalone URLs emerges (e.g. a shareable
+`/experience` link), that's a scope change requiring its own decision
+entry, not an assumption to silently reverse.
+
+---
+
+### 2026-09-14 — Design system grounded in computer vision annotation, not generic "AI" visuals
+
+**Context:** Phase 2 required an actual color/type/layout system,
+constrained by `DESIGN.md`'s "Scientific + Cool + Clean + Professional"
+direction and explicit avoidance of generic AI-page clichés.
+
+**Decision:** Grounded the palette and one structural motif in Prakash's
+real CV work — object-detection bounding boxes. Accent color
+(`#15C46B`, "detection green") references the conventional bounding-box
+color in CV tooling; a corner-bracket motif (used once, in the hero)
+references a bounding-box frame. Typography pairs Space Grotesk
+(technical grotesk, headings/UI) with Source Serif 4 (body, academic
+warmth) — two families with distinct jobs, not decoration.
+
+**Alternatives considered:** The default Inter/Geist + centered hero +
+rounded-card SaaS template (rejected — exactly the generic pattern
+`DESIGN.md` warns against); monospace type for small data-style labels
+(rejected — flagged by the frontend-design skill as a common
+AI-generated-page tell when used decoratively rather than for genuine
+code/data content).
+
+**Reason:** A visual identity grounded in the person's actual technical
+work reads as intentional and specific rather than templated; avoids
+generic AI-startup visual language while still feeling "scientific."
+
+**Consequences:** Any future visual additions (Card components, project
+thumbnails, etc.) should stay consistent with this grounding — sharp
+corners over rounded pills, hairline borders over soft shadows, the
+accent color reserved for deliberate moments rather than repeated
+decoration. Documented fully in `docs/DESIGN.md`.
+
+---
+
+### 2026-09-14 — Stub pages for all nav destinations, using a shared ComingSoon placeholder
+
+**Context:** The Navbar (Phase 2) needs working links for About,
+Projects, Research, Startup, Contact — but those pages' real content is
+scoped to later phases (Phase 3, 4, 5, 6, 7 respectively per
+`ROADMAP.md`).
+
+**Decision:** Created minimal route files for each destination
+(`/about`, `/projects`, `/research`, `/startup`, `/contact`), each
+rendering a shared `ComingSoon` component (title + one-line note, no
+real content).
+
+**Alternatives considered:** Leaving the nav links pointing at
+not-yet-existing routes (rejected — produces real 404s, a broken
+foundation to build on); building full page content now (rejected —
+blurs Phase 2/3+ scope boundaries per `ROADMAP.md` and violates the "No
+Premature Features" rule in `RULES.md`).
+
+**Reason:** A site shell should be genuinely navigable without dead
+links; a placeholder is proportional scaffolding, not premature content.
+
+**Consequences:** Each later phase (3 through 7) replaces its
+corresponding stub's content — the routes already exist, so those phases
+start from "write the real page" rather than "wire up routing."
+
+---
+
+### 2026-09-14 — Fixed: CSS variable naming collision in Tailwind v4 theme mapping
+
+**Context:** Initial `globals.css` draft named root design tokens
+identically to the `@theme inline` block that maps them for Tailwind
+(both used `--color-bg`, `--color-ink`, etc.), creating a
+self-referential `var(--color-bg): var(--color-bg)`-style mapping.
+
+**Decision:** Renamed root tokens without the `color-` prefix (`--bg`,
+`--ink`, `--surface`, etc.) so the `@theme inline` block cleanly maps
+`--color-bg: var(--bg)` without any naming collision.
+
+**Reason:** Caught before it shipped by re-reading the generated CSS
+logic, not through a runtime failure — worth recording so a future
+session doesn't reintroduce the same naming pattern when adding new
+design tokens.
+
+**Consequences:** Any new design token must follow the same
+two-name convention: a plain root variable (`--foo`) plus its
+`--color-foo`/`--font-foo`/etc. mapping in `@theme inline`, never the
+same name in both places.
+
+---
+
+### 2026-09-14 — Removed host port mapping for Postgres to avoid Windows port-exclusion conflicts
+
+**Context:** `docker compose up` failed on the owner's Windows machine
+with `bind: An attempt was made to access a socket in a way forbidden by
+its access permissions` on port 5432. `netstat -ano | grep 5432` showed
+nothing using the port — ruling out a conflicting process (e.g. a native
+Postgres install). This matches a known Windows/WSL2/Hyper-V behavior:
+Windows reserves ("excludes") ranges of ports for its own NAT/networking
+stack, and a port can fall in that range even with nothing visibly using
+it, blocking any other process — including Docker — from binding it.
+This can appear or disappear across reboots or Windows updates, so it's
+not reliably fixable from the project side.
+
+**Decision:** Removed the `ports: ["5432:5432"]` mapping from the `db`
+service in `docker-compose.yml` (left commented out with an explanation,
+for anyone who wants to connect a GUI DB tool directly). `backend`
+reaches `db` over Docker's internal network via the service name `db`
+regardless — the host mapping was never functionally required by the
+app, only a convenience for external tools.
+
+**Alternatives considered:** Diagnosing/fixing the Windows port-exclusion
+range directly (`netsh interface ipv4 show excludedportrange`, freeing
+the range, or restarting the `winnat` service) — rejected as the primary
+fix since it's a machine-specific, potentially-recurring OS quirk outside
+the project's control; documenting it as a fallback instead. Remapping
+to a different host port (e.g. `5433:5432`) — viable alternative, but
+removing the mapping entirely is simpler and the app doesn't need it.
+
+**Reason:** The app has zero functional dependency on Postgres being
+reachable from the Windows host — only backend↔db (both inside Docker)
+matters. Removing an unnecessary host exposure eliminates an entire class
+of host-networking conflicts (this one, and any future port collision on
+5432) rather than working around one instance of it.
+
+**Consequences:** The owner cannot connect a GUI tool (pgAdmin,
+TablePlus, DBeaver, etc.) to `localhost:5432` unless they uncomment the
+port mapping themselves — documented inline in `docker-compose.yml`. If
+they do and hit the same bind error, the fix is a different host port,
+not re-diagnosing this from scratch.

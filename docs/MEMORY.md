@@ -1,90 +1,105 @@
 # MEMORY.md — Current Project State
 
-_Last updated: 2026-09-14_
+_Last updated: 2026-09-18_
 
 ## What Is Currently Implemented
 
-**Backend** (`backend/`): Django + DRF project scaffolded (`config`
-project, `health` app). `GET /api/health/` checks DB connectivity and
-returns 200 (`{"status": "ok", "database": "ok"}`) or 503. Settings are
-fully environment-driven — no hardcoded secrets. Postgres by default,
-sqlite fallback via `DATABASE_ENGINE=sqlite`. One passing test
-(`backend/health/tests.py`).
+**Backend** (`backend/`): Django + DRF, `GET /api/health/` checks DB
+connectivity. Environment-driven settings. One passing test.
 
 **Frontend** (`frontend/`): Next.js (App Router) + TypeScript + Tailwind
-scaffolded. Default template replaced with a minimal placeholder
-homepage. `/status` page + `src/lib/api.ts` call the backend health
-check end-to-end (real frontend↔backend wiring, not just scaffolding).
-Vitest + React Testing Library set up, one passing test. Lint clean.
+v4, with a real, owner-verified design system (Phase 2):
 
-**Infrastructure**: `docker-compose.yml` at repo root wires `db`
-(Postgres 17), `backend`, `frontend` with health checks and volumes.
-`.env.example` at root (for Docker Compose) and inside `backend/` and
-`frontend/` (for running each service without Docker).
+- Design tokens (color, type scale, spacing, radii) in
+  `src/app/globals.css`, grounded in Prakash's CV/annotation work — see
+  `docs/DESIGN.md` for the full rationale.
+- Two fonts (Space Grotesk, Source Serif 4) via `next/font/google` —
+  confirmed loading correctly in the browser (verified via compiled CSS
+  inspection and, ultimately, the owner's own screenshots).
+- Reusable primitives in `src/components/`: `Navbar` (responsive,
+  accessible, mobile menu), `Footer`, `Container`, `Button` (dual-mode:
+  real `<button>` or `Link`), `ComingSoon` (shared placeholder).
+- Routes: `/` (real hero — name, role, one-line positioning, all
+  truthful per `PRD.md`; corner-bracket motif framing the name,
+  owner-approved), `/status` (Phase 1 connectivity check), `/about`,
+  `/projects`, `/research`, `/startup`, `/contact` (all five are
+  `ComingSoon` stubs — real content is Phase 3–7, see `docs/ROADMAP.md`).
+- 11 passing tests across 5 test files. Lint clean. Typecheck clean.
 
-**No content models exist yet** — Profile, Experience, Projects,
-Research, Startup, etc. are all Phase 3+ (see `ROADMAP.md`).
+**Infrastructure**: `docker-compose.yml` wires `db` + `backend` +
+`frontend`, confirmed working end-to-end on the owner's machine (Windows,
+Docker Desktop, Git Bash). Postgres's host port mapping (5432) was
+removed — it isn't needed by the app and was hitting a Windows/WSL2
+port-exclusion conflict on the owner's machine (see `DECISIONS.md`).
+
+**No real page content exists yet** — About, Experience, Education,
+Skills, Projects, Research, Startup, Contact are all still `ComingSoon`
+placeholders. That's Phase 3 onward.
 
 ## What Phase Are We In
 
-**Phase 1 — Technical Foundation** — scaffolding complete, see
-"Verification Gaps" below before calling it fully confirmed.
+**Phase 2 — Design System & Site Shell — COMPLETE.** Verified visually
+by the owner on their own machine (screenshots reviewed, corner-bracket
+motif approved as-is after two rounds of fixes). Ready to start
+**Phase 3 — Personal Profile**.
 
 ## What Was Recently Completed
 
-- Repository inspected: confirmed empty, fresh start, nothing to preserve.
-- Baseline documentation created (Phase 0), then reorganized into `docs/`
-  with `AGENTS.md`/`CLAUDE.md` kept at repo root.
-- GitHub repo created: https://github.com/prakash-bishi/portfolio
-  (last confirmed pushed commit: `6c9a76b`).
-- Phase 1 scaffolding built and committed in Claude's sandbox (`bfa37b4`).
-- **Owner verified `docker compose up --build` on their own machine
-  (Windows, Docker Desktop, Git Bash)** — all three services start,
-  backend healthcheck passes continuously, homepage loads at
-  localhost:3000, `localhost:8000/api/health/` responds `{"status":
-  "ok", "database": "ok"}` correctly.
-- **Found and fixed a real bug during that verification**: `/status`
-  failed with "Could not reach the backend API" even though the backend
-  itself was healthy. Root cause was a Docker networking gotcha —
-  server-side fetches inside the frontend container can't reach the
-  backend via `localhost`, they need the Compose service name
-  (`http://backend:8000`). Fixed by splitting `NEXT_PUBLIC_API_BASE_URL`
-  (browser-side) from a new `INTERNAL_API_BASE_URL` (server-side) in
-  `src/lib/api.ts`, wired through `docker-compose.yml`. Added regression
-  tests covering all three cases. See `DECISIONS.md` for full details.
+- Phase 2 fully closed out: three real bugs were found and fixed only
+  after the owner actually looked at the rendered page (Claude's sandbox
+  cannot render a browser, so these were invisible until real
+  screenshots came back):
+  1. Buttons and the nav wordmark rendered in the wrong font (serif
+     instead of Space Grotesk) — a CSS selector that stopped matching
+     once `Button` was refactored to support `href`-as-Link in this
+     same phase.
+  2. The corner-bracket motif floated as two disconnected marks —
+     attached to a loosely-sized container instead of the actual text
+     it was meant to frame. Fixed by scoping it tightly to the `<h1>`
+     itself (a bounding box around the name, not the whole hero block).
+  3. A Windows/WSL2 port-exclusion conflict on 5432 blocked
+     `docker compose up` entirely — fixed by removing Postgres's
+     unnecessary host port mapping (the app never needed it; only
+     backend↔db, both inside Docker, matters).
+- All three are recorded in `DECISIONS.md` with root causes, so the
+  patterns (element-selector fragility, motif-scoping, unnecessary host
+  port exposure) don't get reintroduced in later phases.
+- `docs/DESIGN.md` updated to reflect the corrected, narrower scope of
+  the corner-bracket motif.
 
 ## What Is Currently Being Worked On
 
-Delivering the `/status` fix back to the owner to pull in, rebuild the
-frontend container, and confirm `/status` now shows "API: ok, Database:
-ok".
+Nothing — Phase 2 is closed. Awaiting the owner's go-ahead to start
+Phase 3 (About page: Experience, Education, and Skills as sections of
+one page, per the nav IA decision in `DECISIONS.md`).
 
 ## What Remains
 
-- **Not yet committed to git** — the `/status` fix (this update) exists
-  only in Claude's sandbox. Needs delivery to the owner + commit + push.
-- Owner still needs to confirm the `/status` fix actually resolves the
-  issue after rebuilding the frontend container.
-- **`npm run build` (frontend production build) still not verified** —
-  fails in Claude's sandbox due to a domain restriction on
-  `fonts.googleapis.com`. `docker compose up` uses `next dev`, not
-  `next build`, so this hasn't been exercised by Docker verification
-  either. Should be checked on a real machine at some point (e.g. before
-  a real production deploy in a later phase) — not urgent for local dev.
-- Database migrations confirmed working in Docker (owner ran
-  `docker compose exec backend python manage.py migrate` successfully
-  against real Postgres — first time this was verified against Postgres
-  rather than sqlite).
-- `docs/DESIGN.md` is still a Phase 2 placeholder.
-- Phase 2 (Design System & Site Shell) has not started.
+- Owner still needs to commit and push the accumulated Phase 2 changes
+  (Claude no longer runs git commands — see `AGENTS.md` workflow note).
+- Real Google Fonts loading is confirmed working via the owner's
+  screenshots, but a production build (`npm run build`) still hasn't
+  been run anywhere with real internet access — only `next dev` has been
+  exercised so far. Not urgent for local development.
+- Phase 3 (Personal Profile) has not started: no real About/Experience/
+  Education/Skills content exists yet, only the `ComingSoon` stub.
 
 ## Important Temporary Constraints
 
+- Any new server-side backend fetch must go through `getApiBaseUrl()` in
+  `src/lib/api.ts` — hardcoding `NEXT_PUBLIC_API_BASE_URL` for
+  server-side code silently breaks under Docker. See `DECISIONS.md`.
+- Any new design token must follow the two-name convention (`--foo` root
+  variable + `--color-foo`/`--font-foo` mapping in `@theme inline`).
 - `frontend/AGENTS.md` and `frontend/CLAUDE.md` are Next.js
-  framework-generated files (regenerated by `next dev`), unrelated to
-  this repo's own root-level `AGENTS.md`/`CLAUDE.md`. Don't confuse the
-  two — see the note in `docs/ARCHITECTURE.md`.
-- Any new server-side backend fetch (new Server Component, Route
-  Handler, etc.) must go through `getApiBaseUrl()` in `src/lib/api.ts`
-  (or an equivalent helper) — hardcoding `NEXT_PUBLIC_API_BASE_URL` for
-  server-side code will silently break under Docker. See `DECISIONS.md`.
+  framework-generated files, unrelated to this repo's root-level
+  `AGENTS.md`/`CLAUDE.md`. Don't confuse the two.
+- Nav is intentionally 6 items — Experience/Education/Skills are
+  sections of `/about`, not separate routes. See the IA decision in
+  `DECISIONS.md` before changing this.
+- Any new CSS motif/decorative element should be verified against an
+  actual screenshot before being considered done — Claude has no way to
+  render a browser in its own sandbox, and this phase's three real bugs
+  were all invisible until the owner looked at the real page.
+- Postgres's host port mapping is intentionally commented out in
+  `docker-compose.yml`, not missing by accident.
