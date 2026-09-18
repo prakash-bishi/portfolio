@@ -27,8 +27,11 @@ Current tests: `backend/health/tests.py` — verifies `/api/health/` returns
 
 Tooling: Vitest + React Testing Library + jsdom.
 
-Current tests (11 across 5 files):
+Current tests (18 across 7 files):
 - `src/app/__tests__/page.test.tsx` — homepage heading renders
+- `src/app/about/__tests__/page.test.tsx` — About page renders real
+  Experience/Education/Skills content correctly (checks specific facts
+  like "76.59%", "SSIPMT, Raipur", skill group labels)
 - `src/components/__tests__/Navbar.test.tsx` — wordmark and nav links
   render; mobile menu is closed by default and opens on toggle
 - `src/components/__tests__/Footer.test.tsx` — current year and nav
@@ -36,9 +39,11 @@ Current tests (11 across 5 files):
 - `src/components/__tests__/Button.test.tsx` — renders a real `<button>`
   without `href`, a `Link` with `href`, and doesn't leak `href` onto the
   button element
+- `src/components/__tests__/TimelineItem.test.tsx` — title/subtitle/
+  period render; detail renders in parentheses, not a middle-dot
+  separator (regression test for the pattern DESIGN.md flags)
 - `src/lib/__tests__/api.test.ts` — API base URL selection across all
-  three cases (server+Docker, server+non-Docker, browser). This is a
-  regression test for a real bug — see `DECISIONS.md`.
+  three cases (server+Docker, server+non-Docker, browser)
 
 ## System-Level
 

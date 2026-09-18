@@ -370,3 +370,96 @@ TablePlus, DBeaver, etc.) to `localhost:5432` unless they uncomment the
 port mapping themselves — documented inline in `docker-compose.yml`. If
 they do and hit the same bind error, the fix is a different host port,
 not re-diagnosing this from scratch.
+
+---
+
+### 2026-09-18 — About page content is static/hardcoded, not Django-CMS-backed
+
+**Context:** `ARCHITECTURE.md`'s general direction is CMS-driven content
+through Django where practical. Phase 3 needed a decision on whether
+Experience/Education/Skills should be real Django models + API +
+frontend fetch, or simpler static content in the frontend.
+
+**Decision:** Static, typed TypeScript content in
+`frontend/src/content/profile.ts`, imported directly by the About page.
+No Django models, no API endpoint, no admin interface for this content.
+
+**Alternatives considered:** Full CMS models (`Experience`, `Education`,
+`Skill`) with DRF endpoints and Django admin — rejected for now.
+
+**Reason:** This content changes rarely (a new degree, a new role — not
+a recurring editing workflow). `RULES.md` explicitly warns against
+creating models "merely because they are theoretically possible" — a
+full CMS stack for content edited maybe once a year is exactly that.
+Projects (Phase 4) and Research (Phase 5) are different: those genuinely
+get added/edited repeatedly, so CMS-backing them is justified when their
+phases arrive.
+
+**Consequences:** Updating bio/experience/education/skills requires a
+code change and redeploy (editing `profile.ts`), not a CMS admin action.
+If a real recurring-edit need emerges later (e.g. wanting to update
+skills without a deploy), revisit with a proper decision entry — don't
+silently bolt on a CMS model for this content without recording why.
+
+---
+
+### 2026-09-18 — Detail annotations use parentheses, not a middle-dot separator
+
+**Context:** While building `TimelineItem` for the About page's
+Experience/Education sections, the first draft joined a period and an
+optional detail (e.g. "Completed 2024" + "76.59%") with a middle dot:
+"Completed 2024 · 76.59%".
+
+**Decision:** Changed to parenthetical form: "Completed 2024 (76.59%)".
+
+**Reason:** `docs/DESIGN.md`'s "Explicitly Avoided" list specifically
+names middle-dot-joined meta strings as a common AI-generated-page tell.
+The first draft reintroduced exactly that pattern — caught by re-reading
+the design system's own rules before shipping, not by an external
+review.
+
+**Consequences:** Any future component joining two pieces of metadata
+(dates, counts, tags) should default to natural prose or parentheses,
+not a dot/pipe separator, unless there's a specific reason a separator
+reads better in that exact context.
+
+---
+
+### 2026-09-18 — Claude's sandbox history diverged from the real GitHub history; recovered by re-cloning
+
+**Context:** Partway through the project, the owner started applying
+Claude's file-by-file patches manually via their own `git add`/`commit`/
+`push` (during a stretch where Claude was preparing files but not
+running git). Claude later resumed running git directly in its own
+sandbox working copy, but did so by continuing from an old local commit
+(`6c9a76b`) rather than first re-syncing with GitHub — not realizing the
+owner's manual commits had already pushed equivalent work under
+different commit hashes and messages. This produced two divergent
+histories from the same ancestor, discovered when the owner's
+`git push` was rejected ("fetch first").
+
+**Decision:** Discarded Claude's divergent sandbox history entirely.
+Re-cloned fresh from `https://github.com/prakash-bishi/portfolio` (the
+owner's real, already-pushed history) and verified its contents matched
+what was expected before rebuilding Phase 3 on top of that real base,
+rather than attempting to merge or cherry-pick between the two
+histories.
+
+**Alternatives considered:** Merging the two histories — rejected as
+needlessly risky and confusing (they contain equivalent, not
+complementary, changes — a merge would either conflict extensively or
+silently pick one side per-file); force-pushing Claude's version over
+GitHub's — rejected outright, `RULES.md` prohibits rewriting history
+without explicit permission, and GitHub's version was the one the owner
+actually verified worked on their machine.
+
+**Reason:** GitHub is the single real source of truth once any commit
+has been pushed to it. A local working copy — whether the owner's or
+Claude's sandbox — is only ever a staging area until pushed.
+
+**Consequences:** Whenever git responsibility shifts between "Claude
+runs git" and "owner runs git manually" (in either direction), the first
+step back into "Claude runs git" must be `git fetch origin` +
+`git log origin/main --oneline`, compared against Claude's assumed
+local state, before making any new commits — not an assumption that
+Claude's last known pushed commit is still accurate.

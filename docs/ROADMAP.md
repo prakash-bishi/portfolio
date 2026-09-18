@@ -5,8 +5,9 @@ Premature Features). Each phase begins only when explicitly requested.
 
 ## Current Phase
 
-**Phase 3 — Personal Profile** — not yet started. Phase 2 is complete,
-verified visually by the owner on their own machine.
+**Phase 3 — Personal Profile** — built and self-verified (lint,
+typecheck, 18 tests pass); awaiting the owner's visual review, same as
+every prior phase. See `MEMORY.md`.
 
 ## Phase 0 — Documentation & Foundation — COMPLETE
 - Repository inspection
@@ -28,9 +29,11 @@ verified visually by the owner on their own machine.
 - Reusable UI primitives (Container, Button, ComingSoon)
 - Stub routes for every nav destination
 
-## Phase 3 — Personal Profile
-- About page containing Experience, Education, and Skills as sections
-  (not separate routes — see the nav IA decision in `DECISIONS.md`)
+## Phase 3 — Personal Profile — AWAITING VISUAL REVIEW
+- About page with Experience, Education, and Skills as sections (not
+  separate routes — see the nav IA decision in `DECISIONS.md`)
+- Content is static/hardcoded (`src/content/profile.ts`), not a Django
+  CMS model — see the Phase 3 decision in `DECISIONS.md`
 
 ## Phase 4 — Projects
 - Project CMS models, API
