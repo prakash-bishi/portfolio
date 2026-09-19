@@ -36,48 +36,34 @@ host port mapping for Postgres (removed — see `DECISIONS.md`).
 
 ## What Phase Are We In
 
-**Phase 3 — Personal Profile** — built and self-verified (lint,
-typecheck, 18 tests pass; content checked against `docs/PRD.md` for
-truthfulness) on top of the repo's real, GitHub-verified history. **Not
-yet visually reviewed by the owner** — same pattern as Phase 2, where
-real bugs only surfaced once the owner actually looked at the rendered
-page. Treat this as unverified until that happens.
+**Phase 3 — Personal Profile — COMPLETE.** Verified visually by the
+owner on their own machine (both screenshots reviewed — Experience/
+Education timeline and the Skills tag grid — approved as-is, no changes
+requested). Pushed to GitHub at `3b20f62`. Ready to start
+**Phase 4 — Projects**.
 
 ## What Was Recently Completed
 
-- **A real git-history divergence was found and fixed.** Claude's
-  sandbox had drifted from GitHub's actual history (see the incident
-  writeup in `DECISIONS.md`) after a period where the owner was
-  committing/pushing Claude's patches manually. Recovered by discarding
-  Claude's divergent history and re-cloning fresh from GitHub — nothing
-  was lost, since GitHub already had the real, owner-verified Phase 2
-  work. Phase 3 was then rebuilt on top of that real base.
-- Built the About page (Phase 3): real Experience/Education/Skills
-  content, three new reusable components (`SectionHeading`,
-  `TimelineItem`, `SkillTag`), 7 new tests (18 total).
-- Made and recorded a real architecture decision: About page content is
-  static/hardcoded TypeScript, not a Django CMS model — this content
-  changes rarely, and a full model+API+admin stack would be premature
-  per `RULES.md`. Full reasoning in `DECISIONS.md`.
-- Caught and fixed a design-system self-inconsistency before shipping:
-  an early `TimelineItem` draft joined text with a middle dot, which
-  `DESIGN.md`'s own "Explicitly Avoided" list flags as a common
-  AI-generated-page tell. Changed to parenthetical form, with a
-  regression test.
+- Phase 3 (About page) built, self-verified, delivered, and pushed to
+  GitHub (`3b20f62`) — recovering cleanly from the git divergence
+  incident documented in `DECISIONS.md`.
+- **Owner visually reviewed Phase 3 and approved it as-is** — no bugs
+  found this time (unlike Phase 2's three rounds of fixes). Timeline
+  layout, "Current" indicator, parenthetical date format, and the
+  Skills tag grid (including the 9-item Image & Data Annotation group)
+  all read correctly at full scale.
 
 ## What Is Currently Being Worked On
 
-Nothing — Phase 3's About page is built and self-verified on the correct
-base, awaiting the owner's visual review and push to GitHub.
+Nothing — Phase 3 is fully closed (built, verified, pushed). Awaiting
+the owner's go-ahead to start Phase 4 (Projects).
 
 ## What Remains
 
-- **Owner has not yet visually reviewed Phase 3.** Same caveat as every
-  prior phase: Claude cannot render a browser in its own sandbox.
-- Owner needs to sync Claude's Phase 3 commit and push to GitHub.
 - Phase 4 (Projects) has not started — this is the first phase that
   will likely need real Django CMS models (projects get added/edited
-  repeatedly), unlike Phase 3's static content.
+  repeatedly), unlike Phase 3's static content. See the Phase 3
+  decision in `DECISIONS.md` for why that distinction matters.
 
 ## Important Temporary Constraints
 
