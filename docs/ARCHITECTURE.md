@@ -88,20 +88,32 @@ frameworks, RAG, complex infrastructure generally.
 
 ## Current Status
 
-Phase 1 (Technical Foundation) — scaffolding complete:
+Through Phase 4 (Projects):
 
-- `backend/` — Django + DRF project (`config`), with a `health` app
-  exposing `GET /api/health/` (checks DB connectivity, returns 200/503).
-  Settings are fully environment-driven (see `.env.example` files);
-  PostgreSQL by default, sqlite fallback for quick local runs without
-  Docker.
-- `frontend/` — Next.js (App Router) + TypeScript + Tailwind, with a
-  minimal placeholder homepage and a `/status` page that calls the
-  backend health check end-to-end via `src/lib/api.ts`.
-- `docker-compose.yml` at repo root — `db` (Postgres 17), `backend`,
-  `frontend` services with health checks and volumes.
-- No real content models exist yet (Profile, Experience, Projects, etc.)
-  — those are Phase 3+ per `ROADMAP.md`.
+- `backend/` — Django + DRF project (`config`), with two apps:
+  - `health` — `GET /api/health/` (checks DB connectivity, returns
+    200/503).
+  - `projects` — `Project` model, DRF read-only API at
+    `/api/projects/` (list) and `/api/projects/<slug>/` (detail),
+    Django admin. Seeded via data migration with the owner's real
+    projects. See `docs/DECISIONS.md` for why Projects is CMS-backed
+    while the About page (Phase 3) is static content, and why the
+    `tags` field avoids Postgres-only types.
+  - Settings are fully environment-driven (see `.env.example` files);
+    PostgreSQL by default, sqlite fallback for quick local runs without
+    Docker.
+- `frontend/` — Next.js (App Router) + TypeScript + Tailwind, with the
+  full design system (Phase 2), a real About page (Phase 3, static
+  content from `src/content/profile.ts`), and real Projects pages
+  (Phase 4, `/projects` and `/projects/[slug]` — this project's first
+  dynamic route — fetching live from the backend via
+  `src/lib/projects.ts`).
+- `docker-compose.yml` at repo root — `db` (Postgres, no host port
+  mapping — see `DECISIONS.md`), `backend`, `frontend` services with
+  health checks and volumes. Confirmed working end-to-end on the
+  owner's machine as of Phase 2.
+- Research, Startup, and Contact are still `ComingSoon` stubs — Phase
+  5+ per `ROADMAP.md`.
 
 One implementation note: `create-next-app` generates its own
 `frontend/AGENTS.md` and `frontend/CLAUDE.md` — these are Next.js

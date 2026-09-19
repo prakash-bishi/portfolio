@@ -463,3 +463,139 @@ step back into "Claude runs git" must be `git fetch origin` +
 `git log origin/main --oneline`, compared against Claude's assumed
 local state, before making any new commits — not an assumption that
 Claude's last known pushed commit is still accurate.
+
+---
+
+### 2026-09-19 — Projects are Django-CMS-backed (real API), unlike Phase 3's static content
+
+**Context:** Phase 3 deliberately kept About-page content as static
+TypeScript rather than Django models, since bio/education content
+changes rarely. Phase 4 needed a decision on whether Projects should
+follow the same pattern or get real backend models.
+
+**Decision:** Built a real `projects` Django app: a `Project` model,
+DRF `ReadOnlyModelViewSet` at `/api/projects/` (list + slug-based
+detail), and Django admin registration. The frontend fetches live from
+this API (`src/lib/projects.ts`, reusing `getApiBaseUrl()` from
+`api.ts`) rather than reading static data.
+
+**Alternatives considered:** Static TypeScript content, matching Phase
+3's pattern — rejected specifically for Projects, per the Phase 3
+decision's own stated exception: "Projects (Phase 4) and Research
+(Phase 5) are different: those genuinely get added/edited repeatedly."
+
+**Reason:** Projects are exactly the kind of content that benefits from
+CMS editing — the owner will add new projects, update statuses, and add
+links/descriptions over time without wanting a code change + redeploy
+each time.
+
+**Consequences:** Requires the backend and database to be running for
+`/projects` and `/projects/[slug]` to work (unlike Phase 3's About page,
+which has zero backend dependency). Both pages handle a backend-
+unreachable error state gracefully (shown to the visitor, not a crash)
+and an empty-list state (no projects published yet) — see
+`frontend/src/app/projects/page.tsx`.
+
+---
+
+### 2026-09-19 — Model fields avoid Postgres-specific types for sqlite-fallback compatibility
+
+**Context:** The `Project` model needed a multi-value `tags` field.
+Postgres's `ArrayField` (`django.contrib.postgres.fields`) was the
+obvious first option given the production database is PostgreSQL.
+
+**Decision:** Used a plain `CharField` storing comma-separated tags
+(`"YOLOv8, Computer Vision"`), parsed via a `tag_list()` model method,
+rather than `ArrayField`.
+
+**Alternatives considered:** `ArrayField` — rejected because it's
+Postgres-only and would break `backend/.env.example`'s documented
+`DATABASE_ENGINE=sqlite` fallback path (see `TESTING.md`/`SECURITY.md`),
+used for quick local runs and this project's own sandboxed testing
+without Docker. A separate `Tag` model with a `ManyToManyField` — viable
+and more "correct" relationally, but unjustified complexity for a
+handful of free-text tags with no need for tag-based filtering/queries
+yet (proportional engineering — see `RULES.md`).
+
+**Reason:** Keeping both database backends genuinely working (not just
+Postgres) has already paid off once this project (Phase 1's local-dev
+sqlite fallback, Phase 4's own test suite ran entirely against sqlite in
+Claude's sandbox). A Postgres-only field type would quietly break that.
+
+**Consequences:** Tag filtering/search, if ever needed, would require a
+migration to a proper `Tag` model at that point — not a blocker now,
+just a known limitation of the comma-string approach.
+
+---
+
+### 2026-09-19 — Seeded the 6 real projects via a data migration, with honest minimal content
+
+**Context:** The owner provided 6 real project titles but no
+descriptions, tech details beyond what's in the title, or completion
+status for 5 of the 6.
+
+**Decision:** Wrote a data migration (`0002_seed_initial_projects.py`)
+seeding all 6 as real `Project` rows. Summaries are literal,
+minimal restatements of each title — no invented outcomes, metrics, or
+capabilities. `status` is left blank for the 5 projects with unconfirmed
+status (renders no badge — see `ProjectCard`) rather than guessing.
+Project 6 ("Personal Portfolio + AI Platform") is the one exception:
+status is set to "In development" and `external_url` points to this
+project's own real, verifiable GitHub repo — both self-referential facts
+already established in this project's own history, not fabricated.
+
+**Alternatives considered:** Leaving projects unseeded, requiring the
+owner to enter all 6 through Django admin manually — rejected as
+unnecessary friction; the titles were already provided as real data, so
+seeding them is a direct application of the Truth Rule (record what's
+actually known), not an exception to it. Writing fuller marketing-style
+descriptions — rejected outright; would have required inventing details
+not actually provided (see `RULES.md`'s Truth Rule).
+
+**Reason:** A data migration is the standard Django mechanism for
+seeding known, real initial data — distinct from a fixture or manual
+admin entry, and it runs automatically on any fresh `migrate`, keeping
+the repository self-contained per `AGENTS.md`'s "the repository
+remembers" principle.
+
+**Consequences:** The owner should log into Django admin and fill in
+fuller descriptions, confirm/set status, and add `external_url` links
+for projects 1–5 once they're ready — this migration is a starting
+point, not a finished content pass. Editing the migration file itself
+after it's been applied elsewhere would not update already-migrated
+databases; future edits to this content should go through Django admin,
+not by modifying `0002_seed_initial_projects.py`.
+
+---
+
+### 2026-09-19 — Git divergence happened a second time; resolved without re-doing work this time
+
+**Context:** Immediately before delivering Phase 4, `git ls-remote`
+showed the owner's GitHub `main` at a commit (`6ede04c`) Claude didn't
+recognize — the same class of issue as the earlier divergence incident,
+recurring because the owner pushed Claude's prepared "Phase 3 close-out"
+doc files under their own git identity, producing a different commit
+hash for identical content (verified via `git diff --stat` showing no
+differences, and via matching tree hashes).
+
+**Decision:** This time, instead of discarding Claude's Phase 4 commit
+and rebuilding it by hand again, used `git cherry-pick` to replay
+Claude's exact Phase 4 diff onto a fresh clone of the real remote
+history. Verified the result was a clean fast-forward
+(`git merge-base --is-ancestor`) and re-ran the full test suite on the
+rebuilt tree before delivering it.
+
+**Reason:** Cherry-pick preserves the exact diff without manually
+retyping every file, and is safe here specifically because the two
+"Phase 3 close" commits were confirmed to have byte-identical trees —
+cherry-picking a commit built on top of equivalent-but-differently-
+hashed history works cleanly in exactly this situation.
+
+**Consequences:** This confirms the fetch-before-work discipline from
+the earlier incident is necessary but not sufficient on its own — it
+catches the divergence, but the recovery method matters too.
+Cherry-pick is the right tool specifically when the trees are verified
+identical; if they ever aren't (a genuine content divergence, not just a
+hash difference), cherry-pick could conflict and would need manual
+resolution, not blind reapplication. Always verify tree equality
+(`git rev-parse <commit>^{tree}`) before assuming cherry-pick is safe.

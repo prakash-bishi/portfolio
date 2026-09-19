@@ -21,7 +21,7 @@
  * code is currently running on the server or in the browser.
  */
 
-function getApiBaseUrl(): string {
+export function getApiBaseUrl(): string {
   const isServer = typeof window === "undefined";
 
   if (isServer) {

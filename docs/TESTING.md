@@ -16,8 +16,14 @@ Real coverage grows as real features are built in later phases.
 
 Tooling: Django's built-in test runner + DRF's `APITestCase`.
 
-Current tests: `backend/health/tests.py` — verifies `/api/health/` returns
-200 and reports the database as reachable.
+Current tests (9, across `health` and `projects` apps):
+- `backend/health/tests.py` — verifies `/api/health/` returns 200 and
+  reports the database as reachable.
+- `backend/projects/tests.py` — model tests (slug auto-generation from
+  title, comma-separated tag parsing/stripping) and API tests (list
+  returns only published projects, detail lookup by slug, 404 for
+  unpublished or unknown slugs, serializer includes parsed tags and
+  human-readable status).
 
 ## Frontend (Next.js + TypeScript)
 
@@ -27,7 +33,7 @@ Current tests: `backend/health/tests.py` — verifies `/api/health/` returns
 
 Tooling: Vitest + React Testing Library + jsdom.
 
-Current tests (18 across 7 files):
+Current tests (28 across 9 files):
 - `src/app/__tests__/page.test.tsx` — homepage heading renders
 - `src/app/about/__tests__/page.test.tsx` — About page renders real
   Experience/Education/Skills content correctly (checks specific facts
@@ -42,6 +48,12 @@ Current tests (18 across 7 files):
 - `src/components/__tests__/TimelineItem.test.tsx` — title/subtitle/
   period render; detail renders in parentheses, not a middle-dot
   separator (regression test for the pattern DESIGN.md flags)
+- `src/components/__tests__/ProjectCard.test.tsx` — title/summary/tags
+  render, links to the correct detail page, status badge only renders
+  when `status_display` is actually set (no guessed/empty badge)
+- `src/lib/__tests__/projects.test.ts` — `getProjects`/`getProject`
+  against a mocked fetch: success, empty list, non-ok errors, and the
+  404-returns-null (not a thrown error) contract
 - `src/lib/__tests__/api.test.ts` — API base URL selection across all
   three cases (server+Docker, server+non-Docker, browser)
 

@@ -5,8 +5,10 @@ Premature Features). Each phase begins only when explicitly requested.
 
 ## Current Phase
 
-**Phase 4 — Projects** — not yet started. Phase 3 is complete,
-verified visually by the owner on their own machine.
+**Phase 4 — Projects** — built and self-verified (lint, typecheck,
+tests, and a real frontend+backend+database integration check in
+Claude's sandbox); awaiting the owner's visual review and Docker
+verification. See `MEMORY.md`.
 
 ## Phase 0 — Documentation & Foundation — COMPLETE
 - Repository inspection
@@ -34,10 +36,13 @@ verified visually by the owner on their own machine.
 - Content is static/hardcoded (`src/content/profile.ts`), not a Django
   CMS model — see the Phase 3 decision in `DECISIONS.md`
 
-## Phase 4 — Projects
-- Project CMS models, API
-- Project listing (+ filtering if justified)
-- Project detail pages
+## Phase 4 — Projects — AWAITING VISUAL REVIEW
+- Project CMS model, DRF API, Django admin (real, per the Phase 3
+  vs. Phase 4 content-architecture distinction in `DECISIONS.md`)
+- Project listing page, project detail pages (dynamic route)
+- Seeded with the owner's 6 real projects via data migration
+- No filtering yet — not justified by 6 projects; revisit if the list
+  grows enough to need it
 
 ## Phase 5 — Research
 - Research interests, research projects
