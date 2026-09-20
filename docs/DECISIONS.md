@@ -599,3 +599,55 @@ identical; if they ever aren't (a genuine content divergence, not just a
 hash difference), cherry-pick could conflict and would need manual
 resolution, not blind reapplication. Always verify tree equality
 (`git rev-parse <commit>^{tree}`) before assuming cherry-pick is safe.
+
+---
+
+### 2026-09-20 — Publications are Django-CMS-backed with no seed data; research interests are static with real content
+
+**Context:** Unlike Phase 4 (where the owner provided real project
+titles to seed), the owner explicitly said they'd add their two papers
+and M.Tech thesis "later through admin" — no titles or details were
+given for Phase 5. Research interests (three areas), by contrast, were
+given directly, with explicit permission to write full descriptions.
+
+**Decision:** Split the Research page into two different content
+patterns:
+- **Publications** — Django-CMS-backed (`research.Publication` model,
+  DRF API, admin), same pattern as Projects, since publications
+  genuinely accumulate over time and the owner confirmed intent to add
+  them via admin. No data migration seeding this model — there was
+  nothing real to seed. The page handles the resulting empty state
+  explicitly ("Publications are being added — check back soon"), not a
+  blank section.
+- **Research interests** — static content
+  (`frontend/src/content/research.ts`), same pattern as the About page.
+  Descriptions were written by Claude (with the owner's explicit
+  permission) as general, factual descriptions of each research
+  area/problem — what novel class discovery *is*, what efficient object
+  detection *is* — not claims about what the owner has personally
+  achieved or discovered in these areas, since no specific results were
+  provided. This keeps the content substantive without fabricating
+  personal research claims, which the Truth Rule treats especially
+  seriously for academic content.
+
+**Alternatives considered:** Seeding Publications with placeholder rows
+("Paper 1", "Paper 2", "M.Tech Thesis") for the owner to fill in —
+rejected; an empty, honestly-labeled state is better than a placeholder
+that could accidentally get left half-real if the owner forgets to
+rename/complete it. Writing research interest descriptions as
+first-person claims ("I have developed...", "My work shows...") —
+rejected outright; nothing in this project's history supports specific
+claims like that, only the general topic areas themselves.
+
+**Reason:** This is a direct continuation of the Phase 3/4 pattern
+(recorded in earlier `DECISIONS.md` entries): content architecture
+follows the actual nature of the content, not a blanket rule. Static
+vs. CMS-backed is decided per content type based on real facts about
+how that content changes and what's actually known — not applied
+uniformly across the whole site.
+
+**Consequences:** The Research page will show real substance for
+interests immediately, but an honest empty state for Publications until
+the owner adds real entries via `/admin`. Any future content type on
+this site should get the same case-by-case treatment — check what's
+actually known and how it changes before defaulting to either pattern.

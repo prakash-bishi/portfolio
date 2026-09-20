@@ -16,7 +16,7 @@ Real coverage grows as real features are built in later phases.
 
 Tooling: Django's built-in test runner + DRF's `APITestCase`.
 
-Current tests (9, across `health` and `projects` apps):
+Current tests (15, across `health`, `projects`, and `research` apps):
 - `backend/health/tests.py` — verifies `/api/health/` returns 200 and
   reports the database as reachable.
 - `backend/projects/tests.py` — model tests (slug auto-generation from
@@ -24,6 +24,11 @@ Current tests (9, across `health` and `projects` apps):
   returns only published projects, detail lookup by slug, 404 for
   unpublished or unknown slugs, serializer includes parsed tags and
   human-readable status).
+- `backend/research/tests.py` — model tests (default author, string
+  representation) and API tests (list returns only published
+  publications, returns an empty array when nothing's published,
+  serializer includes human-readable publication type, 404 for an
+  unpublished publication's detail).
 
 ## Frontend (Next.js + TypeScript)
 
@@ -33,7 +38,7 @@ Current tests (9, across `health` and `projects` apps):
 
 Tooling: Vitest + React Testing Library + jsdom.
 
-Current tests (28 across 9 files):
+Current tests (37 across 11 files):
 - `src/app/__tests__/page.test.tsx` — homepage heading renders
 - `src/app/about/__tests__/page.test.tsx` — About page renders real
   Experience/Education/Skills content correctly (checks specific facts
@@ -47,13 +52,19 @@ Current tests (28 across 9 files):
   button element
 - `src/components/__tests__/TimelineItem.test.tsx` — title/subtitle/
   period render; detail renders in parentheses, not a middle-dot
-  separator (regression test for the pattern DESIGN.md flags)
+  separator
 - `src/components/__tests__/ProjectCard.test.tsx` — title/summary/tags
   render, links to the correct detail page, status badge only renders
-  when `status_display` is actually set (no guessed/empty badge)
+  when `status_display` is actually set
+- `src/components/__tests__/PublicationItem.test.tsx` — title/authors/
+  type render; venue+year format correctly in all combinations
+  (both, venue-only, year-only); link only renders when
+  `external_url` is set
 - `src/lib/__tests__/projects.test.ts` — `getProjects`/`getProject`
   against a mocked fetch: success, empty list, non-ok errors, and the
   404-returns-null (not a thrown error) contract
+- `src/lib/__tests__/research.test.ts` — `getPublications` against a
+  mocked fetch: success, empty array, non-ok errors
 - `src/lib/__tests__/api.test.ts` — API base URL selection across all
   three cases (server+Docker, server+non-Docker, browser)
 

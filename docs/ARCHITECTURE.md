@@ -88,32 +88,38 @@ frameworks, RAG, complex infrastructure generally.
 
 ## Current Status
 
-Through Phase 4 (Projects):
+Through Phase 5 (Research):
 
-- `backend/` — Django + DRF project (`config`), with two apps:
+- `backend/` — Django + DRF project (`config`), with three apps:
   - `health` — `GET /api/health/` (checks DB connectivity, returns
     200/503).
   - `projects` — `Project` model, DRF read-only API at
     `/api/projects/` (list) and `/api/projects/<slug>/` (detail),
     Django admin. Seeded via data migration with the owner's real
-    projects. See `docs/DECISIONS.md` for why Projects is CMS-backed
-    while the About page (Phase 3) is static content, and why the
-    `tags` field avoids Postgres-only types.
+    projects.
+  - `research` — `Publication` model, DRF read-only API at
+    `/api/publications/`, Django admin. **Not seeded** — the owner will
+    add real papers/thesis via admin themselves.
+  - See `docs/DECISIONS.md` for why Projects and Publications are
+    CMS-backed while the About page (Phase 3) and research interests
+    (Phase 5) are static content, and why model fields avoid
+    Postgres-only types (e.g. `ArrayField`).
   - Settings are fully environment-driven (see `.env.example` files);
     PostgreSQL by default, sqlite fallback for quick local runs without
     Docker.
 - `frontend/` — Next.js (App Router) + TypeScript + Tailwind, with the
   full design system (Phase 2), a real About page (Phase 3, static
-  content from `src/content/profile.ts`), and real Projects pages
-  (Phase 4, `/projects` and `/projects/[slug]` — this project's first
-  dynamic route — fetching live from the backend via
-  `src/lib/projects.ts`).
+  content from `src/content/profile.ts`), real Projects pages (Phase 4,
+  `/projects` and `/projects/[slug]` — this project's first dynamic
+  route), and a real Research page (Phase 5, `/research` — static
+  interests + CMS-backed publications, both fetching live from the
+  backend via `src/lib/projects.ts` and `src/lib/research.ts`).
 - `docker-compose.yml` at repo root — `db` (Postgres, no host port
   mapping — see `DECISIONS.md`), `backend`, `frontend` services with
   health checks and volumes. Confirmed working end-to-end on the
   owner's machine as of Phase 2.
-- Research, Startup, and Contact are still `ComingSoon` stubs — Phase
-  5+ per `ROADMAP.md`.
+- Startup and Contact are still `ComingSoon` stubs — Phase 6+ per
+  `ROADMAP.md`.
 
 One implementation note: `create-next-app` generates its own
 `frontend/AGENTS.md` and `frontend/CLAUDE.md` — these are Next.js

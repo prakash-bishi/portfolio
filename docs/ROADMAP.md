@@ -5,10 +5,11 @@ Premature Features). Each phase begins only when explicitly requested.
 
 ## Current Phase
 
-**Phase 4 — Projects** — built and self-verified (lint, typecheck,
+**Phase 5 — Research** — built and self-verified (lint, typecheck,
 tests, and a real frontend+backend+database integration check in
-Claude's sandbox); awaiting the owner's visual review and Docker
-verification. See `MEMORY.md`.
+Claude's sandbox, including both empty and populated Publications
+states); awaiting the owner's visual review and Docker verification.
+See `MEMORY.md`.
 
 ## Phase 0 — Documentation & Foundation — COMPLETE
 - Repository inspection
@@ -36,7 +37,7 @@ verification. See `MEMORY.md`.
 - Content is static/hardcoded (`src/content/profile.ts`), not a Django
   CMS model — see the Phase 3 decision in `DECISIONS.md`
 
-## Phase 4 — Projects — AWAITING VISUAL REVIEW
+## Phase 4 — Projects — COMPLETE (verified on real machine)
 - Project CMS model, DRF API, Django admin (real, per the Phase 3
   vs. Phase 4 content-architecture distinction in `DECISIONS.md`)
 - Project listing page, project detail pages (dynamic route)
@@ -44,10 +45,14 @@ verification. See `MEMORY.md`.
 - No filtering yet — not justified by 6 projects; revisit if the list
   grows enough to need it
 
-## Phase 5 — Research
-- Research interests, research projects
-- Publications (only if genuine ones exist)
-- Honest status labeling throughout
+## Phase 5 — Research — AWAITING VISUAL REVIEW
+- Research interests: static content, three real areas (Computer Vision
+  for Agriculture, Novel Class Discovery, Efficient Object Detection)
+- Publications: CMS-backed (`research.Publication` model/API/admin),
+  same pattern as Projects — but seeded empty, since no real
+  publication details existed yet (see `DECISIONS.md`)
+- Honest empty state shown until the owner adds real papers/thesis via
+  admin
 
 ## Phase 6 — Startup
 - Startup identity, capabilities, services
