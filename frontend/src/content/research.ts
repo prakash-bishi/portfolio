@@ -44,4 +44,12 @@ export const researchInterests: ResearchInterest[] = [
       "family on constrained hardware or in real-time settings, rather " +
       "than only in a research environment with unlimited compute.",
   },
+  {
+    title: "Robustness and Generalization",
+    description:
+      "Improving the ability of detection models to generalize to new " +
+      "domains, datasets, and conditions — for example, training on " +
+      "images from one camera or environment and testing on images from " +
+      "another, or training on one dataset and testing on another.",
+  },
 ];
