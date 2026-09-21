@@ -88,7 +88,7 @@ frameworks, RAG, complex infrastructure generally.
 
 ## Current Status
 
-Through Phase 5 (Research):
+Through Phase 6 (Startup):
 
 - `backend/` — Django + DRF project (`config`), with three apps:
   - `health` — `GET /api/health/` (checks DB connectivity, returns
@@ -112,14 +112,16 @@ Through Phase 5 (Research):
   content from `src/content/profile.ts`), real Projects pages (Phase 4,
   `/projects` and `/projects/[slug]` — this project's first dynamic
   route), and a real Research page (Phase 5, `/research` — static
-  interests + CMS-backed publications, both fetching live from the
-  backend via `src/lib/projects.ts` and `src/lib/research.ts`).
+  interests + CMS-backed publications). Phase 6 adds a real Startup
+  page (`/startup` — static capability content, no new backend, traced
+  directly to already-verified skills — see `docs/DECISIONS.md`), both
+  fetching live from the backend via `src/lib/projects.ts` and
+  `src/lib/research.ts`.
 - `docker-compose.yml` at repo root — `db` (Postgres, no host port
   mapping — see `DECISIONS.md`), `backend`, `frontend` services with
   health checks and volumes. Confirmed working end-to-end on the
   owner's machine as of Phase 2.
-- Startup and Contact are still `ComingSoon` stubs — Phase 6+ per
-  `ROADMAP.md`.
+- Contact is still a `ComingSoon` stub — Phase 7 per `ROADMAP.md`.
 
 One implementation note: `create-next-app` generates its own
 `frontend/AGENTS.md` and `frontend/CLAUDE.md` — these are Next.js

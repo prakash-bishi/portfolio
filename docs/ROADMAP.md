@@ -5,11 +5,9 @@ Premature Features). Each phase begins only when explicitly requested.
 
 ## Current Phase
 
-**Phase 5 — Research** — built and self-verified (lint, typecheck,
-tests, and a real frontend+backend+database integration check in
-Claude's sandbox, including both empty and populated Publications
-states); awaiting the owner's visual review and Docker verification.
-See `MEMORY.md`.
+**Phase 6 — Startup** — built and self-verified (lint, typecheck, 42
+tests, live rendering check); awaiting the owner's visual review and
+Docker verification. See `MEMORY.md`.
 
 ## Phase 0 — Documentation & Foundation — COMPLETE
 - Repository inspection
@@ -45,7 +43,7 @@ See `MEMORY.md`.
 - No filtering yet — not justified by 6 projects; revisit if the list
   grows enough to need it
 
-## Phase 5 — Research — AWAITING VISUAL REVIEW
+## Phase 5 — Research — COMPLETE (verified on real machine)
 - Research interests: static content, three real areas (Computer Vision
   for Agriculture, Novel Class Discovery, Efficient Object Detection)
 - Publications: CMS-backed (`research.Publication` model/API/admin),
@@ -54,10 +52,15 @@ See `MEMORY.md`.
 - Honest empty state shown until the owner adds real papers/thesis via
   admin
 
-## Phase 6 — Startup
-- Startup identity, capabilities, services
-- AI/data areas, projects/prototypes
-- Contact/partnership pathway
+## Phase 6 — Startup — AWAITING VISUAL REVIEW
+- Startup identity, capabilities (static content, not CMS — see
+  `DECISIONS.md`)
+- Capabilities traced directly to already-verified skills — no new
+  claims, no fabricated services/clients/case studies
+- AI/data areas, projects/prototypes: reflected via capability groups
+  and links to the existing About/Projects pages, not duplicated content
+- Contact/partnership pathway: a CTA linking to `/contact` (still a
+  stub — Phase 7 builds the real page)
 
 ## Phase 7 — Contact & SEO
 - Contact workflow, spam protection, validation

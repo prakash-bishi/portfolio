@@ -38,11 +38,14 @@ Current tests (15, across `health`, `projects`, and `research` apps):
 
 Tooling: Vitest + React Testing Library + jsdom.
 
-Current tests (37 across 11 files):
+Current tests (42 across 12 files):
 - `src/app/__tests__/page.test.tsx` — homepage heading renders
 - `src/app/about/__tests__/page.test.tsx` — About page renders real
-  Experience/Education/Skills content correctly (checks specific facts
-  like "76.59%", "SSIPMT, Raipur", skill group labels)
+  Experience/Education/Skills content correctly
+- `src/app/startup/__tests__/page.test.tsx` — Startup page renders the
+  Capabilities section, all three group titles, capability items
+  traceable to real skills, the honest early-stage framing text, and a
+  working /contact CTA link
 - `src/components/__tests__/Navbar.test.tsx` — wordmark and nav links
   render; mobile menu is closed by default and opens on toggle
 - `src/components/__tests__/Footer.test.tsx` — current year and nav

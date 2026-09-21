@@ -651,3 +651,45 @@ interests immediately, but an honest empty state for Publications until
 the owner adds real entries via `/admin`. Any future content type on
 this site should get the same case-by-case treatment — check what's
 actually known and how it changes before defaulting to either pattern.
+
+---
+
+### 2026-09-21 — Startup page reframes already-verified skills as capabilities; no new backend
+
+**Context:** Phase 6 needed Startup content. This is the single most
+truth-sensitive page on the site — `PRD.md` explicitly warns against
+overstating the startup's maturity, and `RULES.md`'s Truth Rule bans
+fabricating clients, services, case studies, or traction.
+
+**Decision:** Built `frontend/src/content/startup.ts` as static content,
+grounded entirely in skills already verified in `PRD.md`'s Reference
+Facts (the same skills shown on the About page) — three capability
+groups (AI Data, Computer Vision, AI/ML), each just a reframing of real
+skills as commercial capability, not a new claim. No Django app, no
+CMS — capabilities don't need per-item admin management the way
+Projects or Publications do. The page opens with an explicit, honest
+framing ("not an established company... no clients, case studies, or
+production deployments") before listing capabilities, rather than
+leading with the capability list and hoping the framing lower down is
+noticed.
+
+**Alternatives considered:** Waiting to build this page until real
+services/clients exist — rejected; `ROADMAP.md` scopes this phase now,
+and an honest "not established yet" framing is exactly what `PRD.md`
+asks for, not something to defer. A CMS-backed "Services" model —
+rejected as premature; nothing here changes per-item the way Projects
+or Publications do, and `RULES.md` warns against creating models
+"merely because they are theoretically possible."
+
+**Reason:** Consistent with this project's established pattern
+(`DECISIONS.md`'s Phase 5 entry): content architecture follows the
+actual nature of the content. Fixed capability descriptions are static
+content; nothing here grows or gets individually managed yet.
+
+**Consequences:** If real services, clients, or case studies become
+genuine in the future, they should NOT be silently added to
+`startup.ts` without deliberate honest-status labeling — see `RULES.md`'s
+distinction between current capability, prototype, research, future
+service, and future product. A future phase revisiting this page should
+re-read `PRD.md`'s Non-Goals and this decision before adding anything
+that could read as traction.
