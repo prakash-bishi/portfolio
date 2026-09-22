@@ -5,9 +5,8 @@ Premature Features). Each phase begins only when explicitly requested.
 
 ## Current Phase
 
-**Phase 6 — Startup** — built and self-verified (lint, typecheck, 42
-tests, live rendering check); awaiting the owner's visual review and
-Docker verification. See `MEMORY.md`.
+**Phase 7 — Contact & SEO** — not yet started. Phase 6 is complete,
+verified visually by the owner on their own machine.
 
 ## Phase 0 — Documentation & Foundation — COMPLETE
 - Repository inspection
@@ -52,7 +51,7 @@ Docker verification. See `MEMORY.md`.
 - Honest empty state shown until the owner adds real papers/thesis via
   admin
 
-## Phase 6 — Startup — AWAITING VISUAL REVIEW
+## Phase 6 — Startup — COMPLETE (verified on real machine)
 - Startup identity, capabilities (static content, not CMS — see
   `DECISIONS.md`)
 - Capabilities traced directly to already-verified skills — no new
