@@ -3,3 +3,4 @@ djangorestframework==3.18.1
 psycopg2-binary==2.9.13
 django-cors-headers==4.9.0
 python-dotenv==1.2.2
+resend==2.47.0

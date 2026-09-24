@@ -5,8 +5,12 @@ Premature Features). Each phase begins only when explicitly requested.
 
 ## Current Phase
 
-**Phase 7 — Contact & SEO** — not yet started. Phase 6 is complete,
-verified visually by the owner on their own machine.
+**Phase 7 — Contact & SEO** — built and self-verified (lint, typecheck,
+26 backend + 60 frontend tests, live end-to-end verification of the
+contact form's honeypot/throttle/validation paths and the SEO routes);
+awaiting the owner's visual review and Docker verification, and Resend
+account setup for email notifications to actually deliver. See
+`MEMORY.md`.
 
 ## Phase 0 — Documentation & Foundation — COMPLETE
 - Repository inspection
@@ -61,9 +65,14 @@ verified visually by the owner on their own machine.
 - Contact/partnership pathway: a CTA linking to `/contact` (still a
   stub — Phase 7 builds the real page)
 
-## Phase 7 — Contact & SEO
-- Contact workflow, spam protection, validation
-- SEO: metadata, sitemap, structured data where useful
+## Phase 7 — Contact & SEO — AWAITING VISUAL REVIEW
+- Contact workflow: real form (Client Component) → DRF API → validation
+  → honeypot + per-IP throttle → database save → best-effort Resend
+  email notification (owner-confirmed architecture, see `DECISIONS.md`)
+- SEO: dynamic sitemap.xml (static routes + live project slugs),
+  robots.txt, Open Graph/Twitter metadata. No structured data (JSON-LD)
+  yet — not clearly justified for a personal portfolio at this size;
+  revisit if there's a real reason later.
 
 ## Phase 8 — Quality
 - Accessibility review

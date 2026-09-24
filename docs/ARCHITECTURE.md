@@ -64,15 +64,24 @@ Do not make everything dynamic by default. Do not introduce caching
 without a concrete reason. Redis is out of scope until there's a real
 need (caching, rate limiting, background jobs, task queues).
 
-## Contact System (conceptual flow)
+## Contact System (implemented, Phase 7)
 
 ```
-Visitor → Next.js Contact Form → Django API → Validation
-        → Spam/security checks → Database/email workflow
+Visitor → ContactForm (Client Component) → POST /api/contact/
+        → DRF validation + honeypot check + per-IP throttle
+        → ContactMessage saved to DB (always, regardless of what follows)
+        → Resend notification email (best-effort — failure is logged,
+          never blocks the response or loses the saved message)
 ```
 
-Exact implementation TBD in the relevant phase. Secrets never reach the
-frontend.
+`frontend/src/components/ContactForm.tsx` is a Client Component (the
+only interactive form in this project so far) rendered inside a Server
+Component page (`app/contact/page.tsx`) so the page still gets real
+metadata. `backend/contact/` holds the model, serializer, view, and the
+Resend integration (`contact/email.py`). See `docs/DECISIONS.md` for why
+Resend was chosen and how the honeypot/throttle spam mitigation works,
+and `docs/SECURITY.md` for the full security posture. Secrets
+(`RESEND_API_KEY`) never reach the frontend — only the backend reads it.
 
 ## Media Strategy
 
@@ -88,9 +97,9 @@ frameworks, RAG, complex infrastructure generally.
 
 ## Current Status
 
-Through Phase 6 (Startup):
+Through Phase 7 (Contact & SEO):
 
-- `backend/` — Django + DRF project (`config`), with three apps:
+- `backend/` — Django + DRF project (`config`), with four apps:
   - `health` — `GET /api/health/` (checks DB connectivity, returns
     200/503).
   - `projects` — `Project` model, DRF read-only API at
@@ -100,28 +109,33 @@ Through Phase 6 (Startup):
   - `research` — `Publication` model, DRF read-only API at
     `/api/publications/`, Django admin. **Not seeded** — the owner will
     add real papers/thesis via admin themselves.
-  - See `docs/DECISIONS.md` for why Projects and Publications are
-    CMS-backed while the About page (Phase 3) and research interests
-    (Phase 5) are static content, and why model fields avoid
+  - `contact` — `ContactMessage` model, DRF write-only API at
+    `/api/contact/` (POST), Django admin (read-only fields — messages
+    are viewed, not edited). Honeypot + per-IP throttle spam mitigation.
+    Resend integration for email notifications (`contact/email.py`).
+    See `docs/DECISIONS.md` and `docs/SECURITY.md`.
+  - See `docs/DECISIONS.md` for why Projects/Publications/Contact are
+    each structured the way they are, and why model fields avoid
     Postgres-only types (e.g. `ArrayField`).
   - Settings are fully environment-driven (see `.env.example` files);
     PostgreSQL by default, sqlite fallback for quick local runs without
     Docker.
 - `frontend/` — Next.js (App Router) + TypeScript + Tailwind, with the
   full design system (Phase 2), a real About page (Phase 3, static
-  content from `src/content/profile.ts`), real Projects pages (Phase 4,
-  `/projects` and `/projects/[slug]` — this project's first dynamic
-  route), and a real Research page (Phase 5, `/research` — static
-  interests + CMS-backed publications). Phase 6 adds a real Startup
-  page (`/startup` — static capability content, no new backend, traced
-  directly to already-verified skills — see `docs/DECISIONS.md`), both
-  fetching live from the backend via `src/lib/projects.ts` and
-  `src/lib/research.ts`.
+  content), real Projects pages (Phase 4, this project's first dynamic
+  route), a real Research page (Phase 5, static interests + CMS-backed
+  publications), a real Startup page (Phase 6, static capabilities), and
+  a real Contact page (Phase 7, this project's first Client Component —
+  see the Contact System section above). SEO: `app/sitemap.ts` (static
+  routes + live project slugs), `app/robots.ts`, and Open Graph/Twitter
+  card metadata in the root layout.
 - `docker-compose.yml` at repo root — `db` (Postgres, no host port
   mapping — see `DECISIONS.md`), `backend`, `frontend` services with
   health checks and volumes. Confirmed working end-to-end on the
   owner's machine as of Phase 2.
-- Contact is still a `ComingSoon` stub — Phase 7 per `ROADMAP.md`.
+- All six core pages now have real content — no `ComingSoon` stubs
+  remain (only `/status`, the internal connectivity check, which is
+  intentionally excluded from the sitemap and disallowed in robots.txt).
 
 One implementation note: `create-next-app` generates its own
 `frontend/AGENTS.md` and `frontend/CLAUDE.md` — these are Next.js

@@ -17,10 +17,26 @@ const sourceSerif = Source_Serif_4({
   subsets: ["latin"],
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const SITE_TITLE = "Prakash Bishi";
+const SITE_DESCRIPTION =
+  "Personal portfolio and AI/Data & Computer Vision startup platform (in development).";
+
 export const metadata: Metadata = {
-  title: "Prakash Bishi",
-  description:
-    "Personal portfolio and AI/Data & Computer Vision startup platform (in development).",
+  metadataBase: new URL(SITE_URL),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    type: "website",
+    siteName: SITE_TITLE,
+  },
+  twitter: {
+    card: "summary",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

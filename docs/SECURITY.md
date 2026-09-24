@@ -31,10 +31,43 @@ future scope only).
 
 ## Contact Form / Spam Protection
 
-- Server-side validation (never trust client-side validation alone).
-- Basic spam mitigation (e.g. honeypot field and/or rate limiting) before
-  considering a third-party CAPTCHA service.
-- No sensitive data exposed in error responses.
+**Implemented (Phase 7):**
+- Server-side validation via DRF serializer (`backend/contact/
+  serializers.py`) — name/email/message required, email format checked,
+  message capped at 5000 characters. Client-side validation exists too
+  (HTML5 `required`/`type="email"`) but is a UX convenience only, never
+  trusted as the actual check.
+- Honeypot field (`website`) — hidden from real visitors via CSS,
+  `tabIndex={-1}`, and `aria-hidden`. A filled honeypot is silently
+  treated as a fake success (still 201, nothing saved or emailed) so
+  bots aren't tipped off that they were caught.
+- Per-IP rate limiting via DRF's `AnonRateThrottle`, scoped to the
+  contact endpoint specifically (`5/hour` default, overridable via
+  `CONTACT_THROTTLE_RATE`).
+- No sensitive data exposed in error responses — validation errors
+  return only the field-level messages DRF generates, never internal
+  details.
+- Escalation path if spam still gets through in practice: add a
+  third-party CAPTCHA (reCAPTCHA/hCaptcha) as the next step, per the
+  original plan — not a silent rewrite of the honeypot/throttle
+  approach. See `docs/DECISIONS.md` for the reasoning.
+
+The submitted message is always saved to the database as its own step,
+independent of whether the Resend notification email succeeds — see
+"Email / Contact Notifications" below.
+
+## Email / Contact Notifications
+
+- Resend (see `docs/DECISIONS.md` for why), via `RESEND_API_KEY` — a
+  real secret, never committed, never logged.
+- `CONTACT_RECIPIENT_EMAIL` must match the email address on the Resend
+  account unless/until a custom domain is verified there — Resend
+  restricts unverified-domain sending to the account's own address (see
+  `backend/contact/email.py`'s docstring).
+- Email sending failure is caught and logged, never raised as a 500 to
+  the visitor, and never blocks or loses the underlying database record
+  — `ContactMessage.email_notification_sent` tracks the outcome for
+  admin visibility without making delivery a hard dependency.
 
 ## File Uploads (if/when introduced)
 

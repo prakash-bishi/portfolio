@@ -693,3 +693,106 @@ distinction between current capability, prototype, research, future
 service, and future product. A future phase revisiting this page should
 re-read `PRD.md`'s Non-Goals and this decision before adding anything
 that could read as traction.
+
+---
+
+### 2026-09-22 — Contact form email delivery via Resend (owner-confirmed)
+
+**Context:** `ARCHITECTURE.md`'s original Contact System section
+described the conceptual flow but not a real email provider. Phase 7
+needed both — the owner explicitly wanted both a stored record AND an
+email notification per submission.
+
+**Decision:** Resend, using the shared `onboarding@resend.dev` sending
+address (no custom domain owned yet). `CONTACT_RECIPIENT_EMAIL` must be
+the same email address used to create the Resend account — verified via
+web search (not memory) before building, since Resend's unverified-
+domain sending is restricted specifically to the account's own email,
+not sending in general. This restriction is actually a good fit here:
+the contact form only ever needs to notify the owner, never an arbitrary
+recipient.
+
+**Alternatives considered:** Gmail SMTP with an app password — also
+viable, discussed with the owner directly; Resend won on: no domain
+verification friction for this specific use case, an HTTP API instead
+of raw SMTP (easier to integrate/debug), a dashboard showing delivery
+status, and trivial upgrade path if a custom domain is added later.
+
+**Reason:** Matches the owner's explicit requirement (email AND
+database) with the simplest available setup given no domain exists yet.
+
+**Consequences:** If `CONTACT_RECIPIENT_EMAIL` doesn't match the
+Resend account's own email, notification emails will silently fail
+(caught and logged, not raised — see `contact/email.py` — the message
+is still saved regardless). If the owner later verifies a custom
+domain, `RESEND_FROM_EMAIL` can be changed to a branded address and the
+recipient restriction goes away — no code changes needed, just env vars.
+
+---
+
+### 2026-09-22 — Contact form: honeypot + per-IP throttle, message always saved regardless of email outcome
+
+**Context:** `SECURITY.md`'s original placeholder called for "basic
+spam mitigation (e.g. honeypot field and/or rate limiting) before
+considering a third-party CAPTCHA service" and rate limiting "at
+minimum" on the contact endpoint. Phase 7 needed to actually implement
+this, not just plan it.
+
+**Decision:** A hidden honeypot field (`website`) that real visitors
+never see (CSS-hidden, `tabIndex={-1}`, `aria-hidden`) or have reason to
+fill — if it's non-empty, the request is silently treated as a fake
+success (still 201, nothing saved, no email sent) rather than exposing
+that spam was detected. Combined with DRF's `AnonRateThrottle`, scoped
+specifically to the contact endpoint (`5/hour` per IP by default,
+overridable via `CONTACT_THROTTLE_RATE`). The message is saved to the
+database as its own step, independent of whether the notification email
+succeeds — `ContactMessage.email_notification_sent` records the outcome
+without ever blocking the save.
+
+**Alternatives considered:** A third-party CAPTCHA (reCAPTCHA, hCaptcha)
+— rejected for now per `SECURITY.md`'s own stated preference to try
+honeypot/rate-limiting first; adds a dependency and a worse UX for a
+low-traffic personal site. Failing the whole request if email sending
+fails — rejected; the database record is the durable source of truth,
+email is a convenience notification on top of it, and losing a real
+inquiry because an email provider hiccupped would be a worse failure
+mode than a missed notification.
+
+**Reason:** Proportional to actual risk for a low-traffic personal
+portfolio — matches `RULES.md`'s general preference for boring, simple
+solutions over heavier infrastructure, and directly fulfills
+`SECURITY.md`'s pre-existing (but until now, unimplemented) plan.
+
+**Consequences:** `SECURITY.md`'s Contact Form section should be updated
+to describe what's actually implemented, not just the plan — done in
+this same phase. If spam still gets through in practice, the next
+escalation step per `SECURITY.md`'s own stated order is a CAPTCHA, not
+a silent rewrite of this approach.
+
+---
+
+### 2026-09-22 — Fixed: frontend/.env.example had been silently misnamed since Phase 1
+
+**Context:** While adding a new env var for Phase 7's SEO work, found
+that `frontend/.env.example` didn't exist — instead there was a file
+literally named `frontend/frontend.env.example`. Traced to commit
+`aa2e89f`, which (ironically) was titled in part "fix frontend
+.env.example gitignore" — the `.gitignore` exception was fixed
+correctly, but the delivered file itself was never renamed from the
+zip-delivery naming convention (`frontend.env.example`, used at the
+time to avoid collisions with other same-named files in a flat delivery
+folder) to its actual intended name.
+
+**Decision:** `git mv frontend/frontend.env.example frontend/.env.example`.
+Verified with `git check-ignore -v` that the `.gitignore` exception now
+actually applies to the correctly-named file.
+
+**Reason:** This file documents how to run the frontend without Docker
+— nobody had hit this in practice because Docker's been the primary
+workflow since Phase 1, so the bug went unnoticed for months.
+
+**Consequences:** A reminder that a zip-delivery filename and a
+repo-destination filename are not the same thing, and a rename step
+during delivery is easy to silently skip. Worth a final `git status`/
+`ls` sanity check after any manual file-placement instructions, not
+just after Claude's own automated commits.

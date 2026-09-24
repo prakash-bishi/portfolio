@@ -16,7 +16,8 @@ Real coverage grows as real features are built in later phases.
 
 Tooling: Django's built-in test runner + DRF's `APITestCase`.
 
-Current tests (15, across `health`, `projects`, and `research` apps):
+Current tests (26, across `health`, `projects`, `research`, and
+`contact` apps):
 - `backend/health/tests.py` — verifies `/api/health/` returns 200 and
   reports the database as reachable.
 - `backend/projects/tests.py` — model tests (slug auto-generation from
@@ -29,6 +30,13 @@ Current tests (15, across `health`, `projects`, and `research` apps):
   publications, returns an empty array when nothing's published,
   serializer includes human-readable publication type, 404 for an
   unpublished publication's detail).
+- `backend/contact/tests.py` — model string representation; view tests
+  (valid submission saves and returns 201, email failure never loses
+  the message, honeypot silently succeeds without saving or emailing,
+  missing fields / invalid email / over-length message all return 400,
+  a 6th submission within an hour is throttled); `send_contact_
+  notification` tests (returns False when unconfigured, True on
+  success, False — not a raised exception — when Resend itself errors).
 
 ## Frontend (Next.js + TypeScript)
 
@@ -38,8 +46,13 @@ Current tests (15, across `health`, `projects`, and `research` apps):
 
 Tooling: Vitest + React Testing Library + jsdom.
 
-Current tests (42 across 12 files):
+Current tests (60 across 16 files):
 - `src/app/__tests__/page.test.tsx` — homepage heading renders
+- `src/app/__tests__/sitemap.test.ts` — includes all static routes,
+  excludes `/status`, includes live project slugs from the backend,
+  falls back to static routes only if the backend is unreachable
+- `src/app/__tests__/robots.test.ts` — allows crawling by default,
+  disallows `/status`, points to the sitemap
 - `src/app/about/__tests__/page.test.tsx` — About page renders real
   Experience/Education/Skills content correctly
 - `src/app/startup/__tests__/page.test.tsx` — Startup page renders the
@@ -63,6 +76,13 @@ Current tests (42 across 12 files):
   type render; venue+year format correctly in all combinations
   (both, venue-only, year-only); link only renders when
   `external_url` is set
+- `src/components/__tests__/ContactForm.test.tsx` — all fields render,
+  the honeypot field is present but kept out of the accessible/tabbable
+  form, submission calls the API client with the right data, and
+  success/rate-limited/error states each render the right message
+- `src/lib/__tests__/contact.test.ts` — `submitContactForm` against a
+  mocked fetch: 201→ok, 429→rate_limited, 400→error with field errors,
+  other statuses and network failures both map to a generic error
 - `src/lib/__tests__/projects.test.ts` — `getProjects`/`getProject`
   against a mocked fetch: success, empty list, non-ok errors, and the
   404-returns-null (not a thrown error) contract

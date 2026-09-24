@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "health",
     "projects",
     "research",
+    "contact",
 ]
 
 MIDDLEWARE = [
@@ -158,6 +159,11 @@ REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
     ],
+    "DEFAULT_THROTTLE_RATES": {
+        # Contact form spam mitigation — separate from a general API
+        # rate limit, scoped specifically to contact.views.ContactView.
+        "contact": os.environ.get("CONTACT_THROTTLE_RATE", "5/hour"),
+    },
 }
 
 # Security headers — meaningful once DEBUG=False (production/staging).
@@ -165,3 +171,14 @@ if not DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_BROWSER_XSS_FILTER = True
     X_FRAME_OPTIONS = "DENY"
+
+
+# Contact form email notifications (Resend) — see docs/DECISIONS.md for
+# why Resend was chosen. RESEND_API_KEY is a real secret, never commit
+# a real value. CONTACT_RECIPIENT_EMAIL must be the same email address
+# used to create the Resend account when RESEND_FROM_EMAIL is left at
+# its resend.dev default — Resend only delivers to that address until a
+# custom domain is verified (see contact/email.py).
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
+RESEND_FROM_EMAIL = os.environ.get("RESEND_FROM_EMAIL", "onboarding@resend.dev")
+CONTACT_RECIPIENT_EMAIL = os.environ.get("CONTACT_RECIPIENT_EMAIL", "")
